@@ -21,8 +21,8 @@ static NSString * const DKSerialPortsKey = @"DKSerialPorts";
 
 // Ports
 -(id)initWithSerialPortAtPath:(NSString *)path name:(NSString *)name;
--(void)openWithBaudRate:(NSUInteger)baud error:(NSError **)error;
--(void)writeData:(NSData *)data error:(NSError **)error;
+-(BOOL)openWithBaudRate:(NSUInteger)baud error:(NSError **)error;
+-(BOOL)writeData:(NSData *)data error:(NSError **)error;
 -(NSData *)readWithError:(NSError **)error;
 -(NSData *)readWithMaximumByteCount:(NSUInteger)bufferSize error:(NSError **)error;
 -(NSData *)readUntilByte:(unsigned char)terminationByte orMaximumByteCount:(NSUInteger)bufferSize error:(NSError **)error;

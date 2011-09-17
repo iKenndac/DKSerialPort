@@ -65,7 +65,7 @@ static const NSTimeInterval kTimeout = 5.0;
 @synthesize serialPortPath;
 @synthesize internalBuffer;
 
--(void)openWithBaudRate:(NSUInteger)baud error:(NSError **)error {
+-(BOOL)openWithBaudRate:(NSUInteger)baud error:(NSError **)error {
     
     // close the port if it is already open
 	if (serialFileDescriptor != -1) {
@@ -93,7 +93,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                          code:0
                                      userInfo:[NSDictionary dictionaryWithObject:@"Couldn't open serial port"
                                                                           forKey:NSLocalizedDescriptionKey]];
-        return;
+        return NO;
     }
     
     // TIOCEXCL causes blocking of non-root processes on this serial-port
@@ -105,7 +105,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
     
     // clear the O_NONBLOCK flag; all calls from here on out are blocking for non-root processes
@@ -117,7 +117,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
     
     // Get the current options and save them so we can restore the default settings later.
@@ -129,7 +129,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
     
     // copy the old termios settings into the current
@@ -155,7 +155,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
     
     //Set baud rate
@@ -167,7 +167,7 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
     
     // Set the receive latency (a.k.a. don't wait to buffer data)
@@ -179,24 +179,29 @@ static const NSTimeInterval kTimeout = 5.0;
                                                                           forKey:NSLocalizedDescriptionKey]];
         close(serialFileDescriptor);
 		serialFileDescriptor = -1;
-        return;
+        return NO;
     }
+    return YES;
 }
 
--(void)writeData:(NSData *)data error:(NSError **)error {
+-(BOOL)writeData:(NSData *)data error:(NSError **)error {
     // send a string to the serial port
     if (serialFileDescriptor != -1) {
-        if (write(serialFileDescriptor, [data bytes], [data length]) == -1 && error) \
+        if (write(serialFileDescriptor, [data bytes], [data length]) == -1 && error) {
             *error = [NSError errorWithDomain:@"org.danielkennett.dkserialport"
                                          code:0
                                      userInfo:[NSDictionary dictionaryWithObject:@"Couldn't write"
                                                                           forKey:NSLocalizedDescriptionKey]];
+            return NO;
+        }
     } else if (error) {
         *error = [NSError errorWithDomain:@"org.danielkennett.dkserialport"
                                      code:0
                                  userInfo:[NSDictionary dictionaryWithObject:@"Couldn't write"
                                                                       forKey:NSLocalizedDescriptionKey]];
+        return NO;
     }
+    return YES;
 }
 
 -(void)close {

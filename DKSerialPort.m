@@ -50,7 +50,6 @@ static const NSTimeInterval kTimeout = 5.0;
     self.internalBuffer = nil;
     self.name = nil;
     self.serialPortPath = nil;
-    [super dealloc];
 }
 
 -(BOOL)isEqual:(id)object {
@@ -321,7 +320,7 @@ static const NSTimeInterval kTimeout = 5.0;
 -(NSString *)readUTF8CStringWithError:(NSError **)error {
     NSData *stringData = [self readUntilByte:0 orMaximumByteCount:kStringReadingBufferSize error:error];
     if (stringData)
-        return [[[NSString alloc] initWithUTF8String:[stringData bytes]] autorelease];
+        return [[NSString alloc] initWithUTF8String:[stringData bytes]];
     
     return nil;
 }
@@ -329,7 +328,7 @@ static const NSTimeInterval kTimeout = 5.0;
 -(NSString *)readLineWithError:(NSError **)error {
     NSData *stringData = [self readUntilByte:'\n' orMaximumByteCount:kStringReadingBufferSize error:error];
     if (stringData)
-        return [[[[NSString alloc] initWithUTF8String:[stringData bytes]] autorelease] 
+        return [[[NSString alloc] initWithUTF8String:[stringData bytes]]
                 stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
     
     return nil;
@@ -396,9 +395,9 @@ static NSMutableArray *serialPortList = nil;
 		CFStringRef serviceType = (CFStringRef)IORegistryEntryCreateCFProperty(serialService, CFSTR(kIOSerialBSDTypeKey), kCFAllocatorDefault, 0);
 		if (modemName && bsdPath) {
 			// If the port already exists in the list of ports, we want that one.  We only create a new one as a last resort.
-			serialPort = [self existingPortWithPath:(NSString *)bsdPath];
+			serialPort = [self existingPortWithPath:(__bridge NSString *)bsdPath];
 			if (serialPort == nil) {
-				serialPort = [[[DKSerialPort alloc] initWithSerialPortAtPath:(NSString *)bsdPath name:(NSString *)modemName] autorelease];
+				serialPort = [[DKSerialPort alloc] initWithSerialPortAtPath:(__bridge NSString *)bsdPath name:(__bridge NSString *)modemName];
 			}
 		}
 		if (modemName) {
